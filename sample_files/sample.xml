@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdd:ComplexDriver author="" date="2001-12-31T12:00:00" name="" version="" xmlns:cdd="http://complexdriverconfigurator/schema/cdd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://complexdriverconfigurator/schema/cdd sample.xsd ">
+  <cdd:ModuleInfo>
+    <cdd:VendorId>cdd:VendorId</cdd:VendorId>
+    <cdd:ModuleId>idvalue0</cdd:ModuleId>
+    <cdd:SwVersion>idvalue1</cdd:SwVersion>
+    <cdd:Description>cdd:Description</cdd:Description>
+  </cdd:ModuleInfo>
+  <cdd:HeaderIncludes>
+    <cdd:Include>cdd:Include</cdd:Include>
+  </cdd:HeaderIncludes>
+  <cdd:Registers>
+    <cdd:Register access="RO" address="" name="" resetValue="" size="0"/>
+  </cdd:Registers>
+  <cdd:Interrupts>
+    <cdd:Interrupt handler="" name="" priority="0" vector="0"/>
+  </cdd:Interrupts>
+  <cdd:Ports>
+    <cdd:Port dataType="" direction="in" name=""/>
+  </cdd:Ports>
+  <cdd:Parameters>
+    <cdd:Parameter description="" max="" min="" name="" type="boolean" value=""/>
+  </cdd:Parameters>
+  <cdd:Functions>
+    <cdd:Function name="" returnType="void"/>
+  </cdd:Functions>
+</cdd:ComplexDriver>

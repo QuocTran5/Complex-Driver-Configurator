@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:cdd="http://complexdriverconfigurator/schema/cdd"
+           targetNamespace="http://complexdriverconfigurator/schema/cdd"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>
+      Schema for a Complex Device Driver (CDD) configuration input file.
+      Consumed by the Complex Driver Configurator to generate C sources
+      (.c/.h) and the corresponding AUTOSAR ECU configuration (.arxml).
+    </xs:documentation>
+  </xs:annotation>
+
+  <!-- ===================== Root element ===================== -->
+  <xs:element name="ComplexDriver">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ModuleInfo" type="cdd:ModuleInfoType" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="Includes" type="cdd:IncludesType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Registers" type="cdd:RegistersType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Interrupts" type="cdd:InterruptsType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Ports" type="cdd:PortsType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Parameters" type="cdd:ParametersType" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="Functions" type="cdd:FunctionsType" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+      <xs:attribute name="version" type="xs:string" use="required"/>
+      <xs:attribute name="author" type="xs:string" use="optional"/>
+      <xs:attribute name="date" type="xs:date" use="optional"/>
+    </xs:complexType>
+
+    <!-- Every register/interrupt/port/parameter/function name must be unique within the driver -->
+    <xs:unique name="UniqueRegisterName">
+      <xs:selector xpath="cdd:Registers/cdd:Register"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UniqueInterruptName">
+      <xs:selector xpath="cdd:Interrupts/cdd:Interrupt"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UniquePortName">
+      <xs:selector xpath="cdd:Ports/cdd:Port"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UniqueParameterName">
+      <xs:selector xpath="cdd:Parameters/cdd:Parameter"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+    <xs:unique name="UniqueFunctionName">
+      <xs:selector xpath="cdd:Functions/cdd:Function"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+  </xs:element>
+
+  <!-- ===================== Module metadata ===================== -->
+  <xs:complexType name="ModuleInfoType">
+    <xs:sequence>
+      <xs:element name="VendorId" type="xs:nonNegativeInteger"/>
+      <xs:element name="ModuleId" type="xs:nonNegativeInteger"/>
+      <xs:element name="SwVersion" type="xs:string"/>
+      <xs:element name="Description" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ===================== Includes ===================== -->
+  <xs:complexType name="IncludesType">
+    <xs:sequence>
+      <xs:element name="Include" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="file" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ===================== Registers / peripherals ===================== -->
+  <xs:complexType name="RegistersType">
+    <xs:sequence>
+      <xs:element name="Register" type="cdd:RegisterType" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="RegisterType">
+    <xs:sequence>
+      <xs:element name="Description" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+    <xs:attribute name="address" type="cdd:HexValueType" use="required"/>
+    <xs:attribute name="size" type="cdd:RegisterSizeType" use="required"/>
+    <xs:attribute name="access" type="cdd:AccessType" use="required"/>
+    <xs:attribute name="resetValue" type="cdd:HexValueType" use="optional"/>
+  </xs:complexType>
+
+  <xs:simpleType name="RegisterSizeType">
+    <xs:restriction base="xs:unsignedByte"/>
+  </xs:simpleType>
+
+  <!-- ===================== Interrupts ===================== -->
+  <xs:complexType name="InterruptsType">
+    <xs:sequence>
+      <xs:element name="Interrupt" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+          <xs:attribute name="vector" type="xs:nonNegativeInteger" use="required"/>
+          <xs:attribute name="priority" type="xs:nonNegativeInteger" use="optional"/>
+          <xs:attribute name="handler" type="cdd:IdentifierType" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ===================== RTE ports ===================== -->
+  <xs:complexType name="PortsType">
+    <xs:sequence>
+      <xs:element name="Port" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+          <xs:attribute name="direction" type="cdd:PortDirectionType" use="required"/>
+          <xs:attribute name="dataType" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="PortDirectionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="in"/>
+      <xs:enumeration value="out"/>
+      <xs:enumeration value="inout"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ===================== ECUC-style configuration parameters ===================== -->
+  <xs:complexType name="ParametersType">
+    <xs:sequence>
+      <xs:element name="Parameter" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+          <xs:attribute name="type" type="cdd:ParameterTypeType" use="required"/>
+          <xs:attribute name="value" type="xs:string" use="required"/>
+          <xs:attribute name="min" type="xs:string" use="optional"/>
+          <xs:attribute name="max" type="xs:string" use="optional"/>
+          <xs:attribute name="description" type="xs:string" use="optional"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="ParameterTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="integer"/>
+      <xs:enumeration value="float"/>
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="enumeration"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ===================== Generated API functions ===================== -->
+  <xs:complexType name="FunctionsType">
+    <xs:sequence>
+      <xs:element name="Function" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="Description" type="xs:string" minOccurs="0"/>
+            <xs:element name="Argument" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+                <xs:attribute name="type" type="xs:string" use="required"/>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="name" type="cdd:IdentifierType" use="required"/>
+          <xs:attribute name="returnType" type="xs:string" default="void"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ===================== Common simple types ===================== -->
+  <xs:simpleType name="IdentifierType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z_][A-Za-z0-9_]*"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="HexValueType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="0[xX][0-9A-Fa-f]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="AccessType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="RO"/>
+      <xs:enumeration value="WO"/>
+      <xs:enumeration value="RW"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
